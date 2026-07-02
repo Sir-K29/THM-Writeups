@@ -47,19 +47,19 @@ NT AUTHORITY\SYSTEM
 
 ## Skills Practiced
 
-- Windows service enumeration
-- SMB share enumeration
-- Anonymous and Guest account access
-- Credential discovery
-- Windows Registry enumeration
-- AutoLogon credential abuse
-- User impersonation with `runas`
-- Service binary hijacking
-- Windows permission analysis using `icacls`
-- Reverse shell deployment
-- Scheduled task abuse
-- Windows privilege escalation
-- Post-exploitation enumeration
+- Windows Service Enumeration
+- SMB Share Enumeration
+- Anonymous and Guest Account Access
+- Credential Discovery
+- Windows Registry Enumeration
+- AutoLogon Credential Abuse
+- User Impersonation With `runas`
+- Service Binary Hijacking
+- Windows Permission Analysis using `icacls`
+- Reverse Shell Deployment
+- Scheduled Task Abuse
+- Windows Privilege Escalation
+- Post-exploitation Enumeration
 
 ---
 
