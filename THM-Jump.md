@@ -1,4 +1,4 @@
-# Jump
+# TryHackMe — Jump
 
 > [!WARNING]
 > This writeup contains the full exploitation methodology for the **Jump** TryHackMe room.
