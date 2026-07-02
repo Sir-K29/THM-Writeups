@@ -20,7 +20,7 @@
 | Room | Jump |
 | Operating System | Linux |
 | Focus | Linux Privilege Escalation |
-
+| Difficulty | Easy |
 ---
 
 ## Skills Practiced
@@ -42,7 +42,7 @@
 
 This room was an excellent demonstration of how multiple small Linux misconfigurations can be chained together into a complete privilege escalation path. None of the individual vulnerabilities were particularly dangerous on their own, but together they allowed an attacker to move from anonymous access all the way to **root**.
 
-The biggest lesson I took away was the importance of thorough enumeration. Every privilege escalation relied on discovering something that appeared insignificant at first—a writable cron script, an unsafe `PATH`, or an overly permissive `sudo` rule. Missing any one of these would have stopped the attack chain entirely.
+The biggest lesson I took away was the importance of thorough enumeration. This room reinforced the importance of slowing down during enumeration. Rather than immediately looking for exploits, carefully inspecting permissions, scheduled tasks, and execution paths revealed every privilege escalation opportunity. It's a mindset I'll continue applying to future Linux assessments.
 
 ---
 
